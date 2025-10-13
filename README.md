@@ -19,7 +19,7 @@ The Pytorch version produces the same predictions as the original implementation
 
 ### Flashzoi
 
-After installation of [FlashAttention-2](https://github.com/Dao-AILab/flash-attention#installation-and-features), [Flashzoi](https://www.biorxiv.org/content/10.1101/2024.12.18.629121v1) offers 3x the speed of Borzoi at comparable or slightly better predictive performance and can be loaded with:
+After installation of [FlashAttention-2](https://github.com/Dao-AILab/flash-attention#installation-and-features), [Flashzoi](https://doi.org/10.1093/bioinformatics/btaf467) offers 3x the speed of Borzoi at comparable or slightly better predictive performance and can be loaded with:
 ```python
 from borzoi_pytorch import Borzoi
 borzoi = Borzoi.from_pretrained('johahi/flashzoi-replicate-0') # 'johahi/flashzoi-replicate-[0-3]'
@@ -37,9 +37,7 @@ Original Borzoi implementation and weights are [here](https://github.com/calico/
 <a id="1">[1]</a> 
 Linder, Johannes, et al. "Predicting RNA-seq coverage from DNA sequence as a unifying model of gene regulation." Nature Genetics (2025): 1-13; doi: [https://doi.org/10.1101/2023.08.30.555582](https://doi.org/10.1038/s41588-024-02053-6)  
 <a id="2">[2]</a> 
-Flashzoi: An enhanced Borzoi model for accelerated genomic analysis  
-Johannes C. Hingerl, Alexander Karollus, Julien Gagneur  
-bioRxiv 2024.12.18.629121; doi: [https://doi.org/10.1101/2024.12.18.629121](https://www.biorxiv.org/content/10.1101/2024.12.18.629121v1)  
+Hingerl, Johannes et al. "Flashzoi: an enhanced Borzoi for accelerated genomic analysis." Bioinformatics, Volume 41, Issue 9, September 2025, btaf467,; doi: [https://doi.org/10.1093/bioinformatics/btaf467](https://doi.org/10.1093/bioinformatics/btaf467)  
 <a id="3">[3]</a> 
 [enformer-pytorch github](https://github.com/lucidrains/enformer-pytorch/),
 Phil Wang

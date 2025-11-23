@@ -154,10 +154,21 @@ class Borzoi(PreTrainedModel):
             nn.Dropout(0.1),
             nn.GELU(approximate='tanh'),
         )
-        if self.enable_human_head:
-            self.human_head = nn.Conv1d(in_channels = 1920, out_channels = 7611, kernel_size = 1)
-        if self.enable_mouse_head:
-            self.mouse_head = nn.Conv1d(in_channels = 1920, out_channels = 2608, kernel_size = 1)
+        if hasattr(config, "num_classes") and config.num_classes is not None:
+            self.output = nn.Conv1d(in_channels = 1920, out_channels = config.num_classes, kernel_size = 1)
+
+            self.enable_human_head = False
+            self.enable_mouse_head = False
+            self.human_head = None
+            self.mouse_head = None
+            self.custom_output = True
+        else:
+            if self.enable_human_head:
+                self.human_head = nn.Conv1d(in_channels = 1920, out_channels = 7611, kernel_size = 1)
+            if self.enable_mouse_head:
+                self.mouse_head = nn.Conv1d(in_channels = 1920, out_channels = 2608, kernel_size = 1)
+            self.output = None
+            self.custom_output = False
         self.final_softplus = nn.Softplus()
 
 
@@ -183,6 +194,9 @@ class Borzoi(PreTrainedModel):
         Returns:
             None
         """
+        if self.custom_output:
+            raise NotImplementedError("Cannot subset tracks when using custom output layer.")
+
         if not hasattr(self, 'human_head_bak'):
             self.human_head_bak = copy.deepcopy(self.human_head)
         else:
@@ -199,6 +213,8 @@ class Borzoi(PreTrainedModel):
         Returns:
             None
         """
+        if self.custom_output:
+            raise NotImplementedError("Cannot reset tracks when using custom output layer.")
         self.human_head = copy.deepcopy(self.human_head_bak)
 
     
@@ -264,7 +280,7 @@ class Borzoi(PreTrainedModel):
         return conved_slices, slice_length
 
 
-    def forward(self, x, is_human = True, data_parallel_training = False, return_embeddings = False):
+    def forward(self, x, is_human = False, data_parallel_training = False, return_embeddings = False):
         """
         Performs the forward pass of the model.
 
@@ -282,15 +298,21 @@ class Borzoi(PreTrainedModel):
         with torch.amp.autocast('cuda', enabled=False):
             if data_parallel_training:
                 # we need this to get gradients for both heads if doing DDP training
-                if is_human:
-                    out = self.final_softplus(self.human_head(x.float())) + 0 * self.mouse_head(x.float()).sum()
+                if self.custom_output:
+                    out = self.final_softplus(self.output(x.float()))
                 else:
-                    out = self.final_softplus(self.mouse_head(x.float())) + 0 * self.human_head(x.float()).sum()
+                    if is_human:
+                        out = self.final_softplus(self.human_head(x.float())) + 0 * self.mouse_head(x.float()).sum()
+                    else:
+                        out = self.final_softplus(self.mouse_head(x.float())) + 0 * self.human_head(x.float()).sum()
             else:
-                if is_human:
-                    out = self.final_softplus(self.human_head(x.float()))
+                if self.custom_output:
+                    out = self.final_softplus(self.output(x.float()))
                 else:
-                    out = self.final_softplus(self.mouse_head(x.float()))
+                    if is_human:
+                        out = self.final_softplus(self.human_head(x.float()))
+                    else:
+                        out = self.final_softplus(self.mouse_head(x.float()))
 			
         if return_embeddings:
             return out, x

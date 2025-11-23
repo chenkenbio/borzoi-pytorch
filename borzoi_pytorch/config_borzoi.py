@@ -16,13 +16,14 @@ class BorzoiConfig(PretrainedConfig):
         attn_dropout = 0.05,
         pos_dropout = 0.01,
         enable_mouse_head = False,
+        num_classes: int=None,
         bins_to_return = 6144,
         **kwargs,
     ):
         self.dim = dim
         self.depth = depth
         self.heads = heads
-        # self.output_heads = output_heads
+        self.num_classes = num_classes
         self.attn_dim_key = attn_dim_key
         self.attn_dim_value = attn_dim_value
         self.dropout_rate = dropout_rate
